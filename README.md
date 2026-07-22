@@ -38,6 +38,9 @@ last-mile "look at these compounds" step.
 - **Atom/bond indices**: `--atom-indices`/`--bond-indices` annotate every
   atom/bond with its RDKit index, for referring to a specific atom or bond
   (e.g. when reporting a docking/SAR finding, or picking a SMARTS anchor)
+- **Font size**: `--font-size` (points; default 7, compound name is drawn
+  2pt larger) controls the compound name/property text size, in both HTML
+  and PDF
 - **Jupyter API**: `MoleculeGrid` is the one object the CLI, HTML renderer,
   and PDF renderer all share -- build it, `sort_by(...)` (chainable), and
   either let it auto-display inline (`_repr_html_`) or write it out
@@ -147,6 +150,9 @@ dd_draw hits.smi -o hits.html --props-csv docking_scores.csv --sort-by docking_s
 
 # annotate atom/bond indices, and keep each molecule's original orientation instead of auto-rotating
 dd_draw hits.sdf -o hits.html --atom-indices --bond-indices --no-orient-horizontal
+
+# smaller/larger text (default is 7pt)
+dd_draw data/sample_drugs.sdf -o grid.html --font-size 5
 ```
 
 Full option list: `dd_draw --help`.
@@ -166,6 +172,7 @@ Full option list: `dd_draw --help`.
 | `--no-orient-horizontal` | keep each molecule's original 2D orientation instead of rotating it to be as wide as possible | rotate |
 | `--atom-indices` | annotate each atom with its RDKit atom index | off |
 | `--bond-indices` | annotate each bond with its RDKit bond index | off |
+| `--font-size` | property text size in points (compound name is drawn 2pt larger); applies to both HTML and PDF | 7 |
 
 Available `--compute-props` descriptors: `MW`, `LogP`, `TPSA`, `HBD`, `HBA`,
 `RotB`, `NumRings`, `HeavyAtoms`, `FractionCSP3`, `QED`.
@@ -191,12 +198,13 @@ grid2 = MoleculeGrid.from_smiles(
     title="My library",
 ).sort_by("MW")
 
-# atom/bond indices, original (non-rotated) orientation
+# atom/bond indices, original (non-rotated) orientation, smaller text
 grid3 = MoleculeGrid.from_sdf(
     "hits.sdf",
     atom_indices=True,
     bond_indices=True,
     orient_horizontal=False,
+    font_size=5,
 )
 ```
 

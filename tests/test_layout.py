@@ -19,6 +19,7 @@ def test_default_layout_flags():
     assert grid.orient_horizontal is True
     assert grid.atom_indices is False
     assert grid.bond_indices is False
+    assert grid.font_size == 7
 
 
 def test_layout_flags_are_settable_via_from_sdf():

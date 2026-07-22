@@ -53,6 +53,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--atom-indices", action="store_true", help="Annotate each atom with its RDKit atom index")
     p.add_argument("--bond-indices", action="store_true", help="Annotate each bond with its RDKit bond index")
+    p.add_argument(
+        "--font-size",
+        type=int,
+        default=7,
+        help="Property text size in points (compound name is drawn 2pt larger) (default: 7)",
+    )
     return p
 
 
@@ -76,6 +82,7 @@ def main(argv: list[str] | None = None) -> None:
         orient_horizontal=args.orient_horizontal,
         atom_indices=args.atom_indices,
         bond_indices=args.bond_indices,
+        font_size=args.font_size,
     )
 
     if args.sort_by:

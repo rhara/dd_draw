@@ -22,7 +22,7 @@
   .cell .depiction svg { max-width: 100%; height: auto; }
   .cell .name {
     font-weight: 600;
-    font-size: 0.95em;
+    font-size: {{ name_font_size }}pt;
     text-align: center;
     margin-top: 4px;
     word-break: break-word;
@@ -31,7 +31,7 @@
     width: 100%;
     margin-top: 6px;
     border-collapse: collapse;
-    font-size: 0.82em;
+    font-size: {{ prop_font_size }}pt;
   }
   .cell table.props td { padding: 1px 4px; }
   .cell table.props td.key { color: #666; text-align: right; white-space: nowrap; }

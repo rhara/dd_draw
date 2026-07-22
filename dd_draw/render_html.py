@@ -61,4 +61,6 @@ def render_html(grid: "MoleculeGrid") -> str:
         records=rows,
         properties=properties,
         mols_per_row=grid.mols_per_row,
+        prop_font_size=grid.font_size,
+        name_font_size=grid.font_size + 2,
     )

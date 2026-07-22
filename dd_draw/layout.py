@@ -21,6 +21,7 @@ class MoleculeGrid:
     orient_horizontal: bool = True
     atom_indices: bool = False
     bond_indices: bool = False
+    font_size: int = 7
     title: Optional[str] = None
 
     @classmethod

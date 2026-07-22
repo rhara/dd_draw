@@ -50,3 +50,17 @@ def test_render_html_mw_shows_two_decimals():
     html = render_html(grid)
     aspirin = next(r for r in grid.records if r.name == "aspirin")
     assert f"{aspirin.props['MW']:.2f}" in html
+
+
+def test_render_html_default_font_size():
+    grid = MoleculeGrid.from_sdf(DATA_DIR / "sample_drugs.sdf", properties=["MW"])
+    html = render_html(grid)
+    assert "font-size: 7pt" in html  # property text
+    assert "font-size: 9pt" in html  # compound name
+
+
+def test_render_html_custom_font_size():
+    grid = MoleculeGrid.from_sdf(DATA_DIR / "sample_drugs.sdf", properties=["MW"], font_size=12)
+    html = render_html(grid)
+    assert "font-size: 12pt" in html
+    assert "font-size: 14pt" in html

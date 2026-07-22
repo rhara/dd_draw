@@ -24,21 +24,22 @@ if TYPE_CHECKING:
 
 MARGIN = 15 * mm
 CELL_PADDING = 6
-NAME_FONT_SIZE = 9
-PROP_FONT_SIZE = 7
-LINE_HEIGHT = PROP_FONT_SIZE + 2
 TITLE_HEIGHT = 18
 
 
 def render_pdf(grid: "MoleculeGrid", path: Union[str, Path], page_size=A4) -> None:
     properties = grid.display_properties()
+    prop_font_size = grid.font_size
+    name_font_size = grid.font_size + 2
+    line_height = prop_font_size + 2
+
     page_w, page_h = page_size
     cols = max(1, grid.mols_per_row)
     cell_w = (page_w - 2 * MARGIN) / cols
     depiction_w = cell_w - 2 * CELL_PADDING
     scale = depiction_w / grid.cell_width
     depiction_h = grid.cell_height * scale
-    text_block_h = NAME_FONT_SIZE + 4 + len(properties) * LINE_HEIGHT
+    text_block_h = name_font_size + 4 + len(properties) * line_height
     cell_h = depiction_h + text_block_h + 2 * CELL_PADDING
 
     top_y = page_h - MARGIN - (TITLE_HEIGHT if grid.title else 0)
@@ -77,14 +78,14 @@ def render_pdf(grid: "MoleculeGrid", path: Union[str, Path], page_size=A4) -> No
         drawing.scale(scale, scale)
         renderPDF.draw(drawing, c, x0 + CELL_PADDING, y_top - depiction_h)
 
-        name_y = y_top - depiction_h - NAME_FONT_SIZE - 2
-        c.setFont("Helvetica-Bold", NAME_FONT_SIZE)
+        name_y = y_top - depiction_h - name_font_size - 2
+        c.setFont("Helvetica-Bold", name_font_size)
         c.drawCentredString(x0 + cell_w / 2, name_y, rec.name)
 
-        prop_y = name_y - LINE_HEIGHT
-        c.setFont("Helvetica", PROP_FONT_SIZE)
+        prop_y = name_y - line_height
+        c.setFont("Helvetica", prop_font_size)
         for key in properties:
             c.drawCentredString(x0 + cell_w / 2, prop_y, f"{key}: {format_value(rec.props.get(key), key)}")
-            prop_y -= LINE_HEIGHT
+            prop_y -= line_height
 
     c.save()

@@ -51,3 +51,11 @@ def test_cli_no_orient_horizontal(tmp_path):
     main([str(DATA_DIR / "sample_drugs.sdf"), "-o", str(out_default)])
     main([str(DATA_DIR / "sample_drugs.sdf"), "-o", str(out_kept), "--no-orient-horizontal"])
     assert out_default.read_text() != out_kept.read_text()
+
+
+def test_cli_font_size(tmp_path):
+    out = tmp_path / "grid.html"
+    main([str(DATA_DIR / "sample_drugs.sdf"), "-o", str(out), "--font-size", "14"])
+    html = out.read_text()
+    assert "font-size: 14pt" in html
+    assert "font-size: 16pt" in html
