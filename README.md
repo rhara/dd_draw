@@ -24,7 +24,9 @@ last-mile "look at these compounds" step.
   `.smi` input carries no properties of its own, so `--compute-props` fills
   in RDKit descriptors on demand (MW, LogP, TPSA, HBD, HBA, RotB, NumRings,
   HeavyAtoms, FractionCSP3, QED) and/or `--props-csv` merges in an external
-  table keyed by compound name
+  table keyed by compound name. Floats are shown to 3 significant figures by
+  default, except `MW`, which always shows a fixed 2 decimal places (e.g.
+  `180.16`, matching the conventional way molecular weight is reported)
 - **Sorting**: `--sort-by NAME` reorders the whole grid by any one property,
   ascending or descending (`--descending`); compounds missing that property
   always sort last, regardless of direction

@@ -35,3 +35,18 @@ def test_format_value_rounds_floats_and_marks_missing():
     assert format_value(None) == "—"
     assert format_value(1.23456) == "1.23"
     assert format_value("text") == "text"
+
+
+def test_format_value_mw_always_shows_two_decimals():
+    assert format_value(180.16, "MW") == "180.16"
+    assert format_value(180.1, "MW") == "180.10"
+    assert format_value(46.07, "MW") == "46.07"
+    # unaffected properties keep the general 3-significant-figure format
+    assert format_value(180.16, "LogP") == "180"
+
+
+def test_render_html_mw_shows_two_decimals():
+    grid = MoleculeGrid.from_sdf(DATA_DIR / "sample_drugs.sdf", properties=["MW"])
+    html = render_html(grid)
+    aspirin = next(r for r in grid.records if r.name == "aspirin")
+    assert f"{aspirin.props['MW']:.2f}" in html

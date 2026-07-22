@@ -84,7 +84,7 @@ def render_pdf(grid: "MoleculeGrid", path: Union[str, Path], page_size=A4) -> No
         prop_y = name_y - LINE_HEIGHT
         c.setFont("Helvetica", PROP_FONT_SIZE)
         for key in properties:
-            c.drawCentredString(x0 + cell_w / 2, prop_y, f"{key}: {format_value(rec.props.get(key))}")
+            c.drawCentredString(x0 + cell_w / 2, prop_y, f"{key}: {format_value(rec.props.get(key), key)}")
             prop_y -= LINE_HEIGHT
 
     c.save()

@@ -19,11 +19,20 @@ _env = Environment(
 
 MISSING = "—"  # em dash
 
+# Properties with a conventional fixed decimal precision, shown at that
+# precision regardless of magnitude instead of the general 3-significant-
+# figure default (which drops MW's usual 2 decimals for anything >= 100,
+# e.g. 180.16 -> "180").
+DECIMAL_PLACES = {"MW": 2}
 
-def format_value(value) -> str:
+
+def format_value(value, key: str = None) -> str:
     if value is None:
         return MISSING
     if isinstance(value, float):
+        decimals = DECIMAL_PLACES.get(key)
+        if decimals is not None:
+            return f"{value:.{decimals}f}"
         return f"{value:.3g}"
     return str(value)
 
@@ -43,7 +52,7 @@ def render_html(grid: "MoleculeGrid") -> str:
                     atom_indices=grid.atom_indices,
                     bond_indices=grid.bond_indices,
                 ),
-                "formatted": {key: format_value(rec.props.get(key)) for key in properties},
+                "formatted": {key: format_value(rec.props.get(key), key) for key in properties},
             }
         )
     template = _env.get_template("grid.html")
