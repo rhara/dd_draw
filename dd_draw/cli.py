@@ -59,6 +59,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=7,
         help="Property text size in points (compound name is drawn 2pt larger) (default: 7)",
     )
+    p.add_argument(
+        "--cell-gap",
+        type=int,
+        default=8,
+        help="Spacing between grid cells, in pixels (HTML) / points (PDF) (default: 8)",
+    )
     return p
 
 
@@ -83,6 +89,7 @@ def main(argv: list[str] | None = None) -> None:
         atom_indices=args.atom_indices,
         bond_indices=args.bond_indices,
         font_size=args.font_size,
+        cell_gap=args.cell_gap,
     )
 
     if args.sort_by:

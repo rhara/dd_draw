@@ -41,6 +41,9 @@ last-mile "look at these compounds" step.
 - **Font size**: `--font-size` (points; default 7, compound name is drawn
   2pt larger) controls the compound name/property text size, in both HTML
   and PDF
+- **Cell spacing**: `--cell-gap` (default 8, pixels in HTML / points in PDF)
+  controls the spacing between grid cells; each cell is also outlined with a
+  light border (in both formats) so the cell boundary itself is visible
 - **Jupyter API**: `MoleculeGrid` is the one object the CLI, HTML renderer,
   and PDF renderer all share -- build it, `sort_by(...)` (chainable), and
   either let it auto-display inline (`_repr_html_`) or write it out
@@ -151,8 +154,8 @@ dd_draw hits.smi -o hits.html --props-csv docking_scores.csv --sort-by docking_s
 # annotate atom/bond indices, and keep each molecule's original orientation instead of auto-rotating
 dd_draw hits.sdf -o hits.html --atom-indices --bond-indices --no-orient-horizontal
 
-# smaller/larger text (default is 7pt)
-dd_draw data/sample_drugs.sdf -o grid.html --font-size 5
+# smaller/larger text (default is 7pt), tighter cell spacing (default is 8)
+dd_draw data/sample_drugs.sdf -o grid.html --font-size 5 --cell-gap 4
 ```
 
 Full option list: `dd_draw --help`.
@@ -173,6 +176,7 @@ Full option list: `dd_draw --help`.
 | `--atom-indices` | annotate each atom with its RDKit atom index | off |
 | `--bond-indices` | annotate each bond with its RDKit bond index | off |
 | `--font-size` | property text size in points (compound name is drawn 2pt larger); applies to both HTML and PDF | 7 |
+| `--cell-gap` | spacing between grid cells, in pixels (HTML) / points (PDF) | 8 |
 
 Available `--compute-props` descriptors: `MW`, `LogP`, `TPSA`, `HBD`, `HBA`,
 `RotB`, `NumRings`, `HeavyAtoms`, `FractionCSP3`, `QED`.
@@ -198,13 +202,14 @@ grid2 = MoleculeGrid.from_smiles(
     title="My library",
 ).sort_by("MW")
 
-# atom/bond indices, original (non-rotated) orientation, smaller text
+# atom/bond indices, original (non-rotated) orientation, smaller/tighter text and cells
 grid3 = MoleculeGrid.from_sdf(
     "hits.sdf",
     atom_indices=True,
     bond_indices=True,
     orient_horizontal=False,
     font_size=5,
+    cell_gap=4,
 )
 ```
 

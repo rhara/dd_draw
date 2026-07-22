@@ -63,4 +63,5 @@ def render_html(grid: "MoleculeGrid") -> str:
         mols_per_row=grid.mols_per_row,
         prop_font_size=grid.font_size,
         name_font_size=grid.font_size + 2,
+        cell_gap=grid.cell_gap,
     )

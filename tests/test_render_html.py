@@ -64,3 +64,15 @@ def test_render_html_custom_font_size():
     html = render_html(grid)
     assert "font-size: 12pt" in html
     assert "font-size: 14pt" in html
+
+
+def test_render_html_default_cell_gap():
+    grid = MoleculeGrid.from_sdf(DATA_DIR / "sample_drugs.sdf", properties=["MW"])
+    html = render_html(grid)
+    assert "gap: 8px" in html
+
+
+def test_render_html_custom_cell_gap():
+    grid = MoleculeGrid.from_sdf(DATA_DIR / "sample_drugs.sdf", properties=["MW"], cell_gap=2)
+    html = render_html(grid)
+    assert "gap: 2px" in html

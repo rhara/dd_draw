@@ -32,10 +32,11 @@ def render_pdf(grid: "MoleculeGrid", path: Union[str, Path], page_size=A4) -> No
     prop_font_size = grid.font_size
     name_font_size = grid.font_size + 2
     line_height = prop_font_size + 2
+    gap = grid.cell_gap
 
     page_w, page_h = page_size
     cols = max(1, grid.mols_per_row)
-    cell_w = (page_w - 2 * MARGIN) / cols
+    cell_w = (page_w - 2 * MARGIN - (cols - 1) * gap) / cols
     depiction_w = cell_w - 2 * CELL_PADDING
     scale = depiction_w / grid.cell_width
     depiction_h = grid.cell_height * scale
@@ -43,7 +44,7 @@ def render_pdf(grid: "MoleculeGrid", path: Union[str, Path], page_size=A4) -> No
     cell_h = depiction_h + text_block_h + 2 * CELL_PADDING
 
     top_y = page_h - MARGIN - (TITLE_HEIGHT if grid.title else 0)
-    rows_per_page = max(1, int((top_y - MARGIN) // cell_h))
+    rows_per_page = max(1, int((top_y - MARGIN + gap) // (cell_h + gap)))
     per_page = rows_per_page * cols
 
     c = canvas.Canvas(str(path), pagesize=page_size)
@@ -61,8 +62,12 @@ def render_pdf(grid: "MoleculeGrid", path: Union[str, Path], page_size=A4) -> No
             draw_title()
         row, col = divmod(pos, cols)
 
-        x0 = MARGIN + col * cell_w
-        y_top = top_y - row * cell_h
+        x0 = MARGIN + col * (cell_w + gap)
+        y_top = top_y - row * (cell_h + gap)
+
+        c.setStrokeColorRGB(0.867, 0.867, 0.867)
+        c.setLineWidth(0.5)
+        c.rect(x0, y_top - cell_h, cell_w, cell_h, stroke=1, fill=0)
 
         svg_text = mol_to_svg(
             rec.mol,

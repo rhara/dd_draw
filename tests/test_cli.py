@@ -59,3 +59,9 @@ def test_cli_font_size(tmp_path):
     html = out.read_text()
     assert "font-size: 14pt" in html
     assert "font-size: 16pt" in html
+
+
+def test_cli_cell_gap(tmp_path):
+    out = tmp_path / "grid.html"
+    main([str(DATA_DIR / "sample_drugs.sdf"), "-o", str(out), "--cell-gap", "3"])
+    assert "gap: 3px" in out.read_text()

@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 from pypdf import PdfReader
@@ -46,3 +47,43 @@ def test_render_pdf_larger_font_size_needs_more_pages(tmp_path):
     large_font.to_pdf(large_out)
 
     assert len(PdfReader(str(large_out)).pages) > len(PdfReader(str(small_out)).pages)
+
+
+def _page_content(path) -> str:
+    return PdfReader(str(path)).pages[0].get_contents().get_data().decode("latin-1")
+
+
+def test_render_pdf_draws_one_border_per_cell(tmp_path):
+    grid = MoleculeGrid.from_sdf(DATA_DIR / "sample_drugs.sdf", properties=["MW"])
+    grid.records = grid.records[:5]
+    out = tmp_path / "bordered.pdf"
+    grid.to_pdf(out)
+
+    # border stroke color set once per cell, immediately followed by a
+    # rectangle path + stroke ("re S")
+    content = _page_content(out)
+    assert content.count(".867 .867 .867 RG") == len(grid)
+    assert content.count(" re S") == len(grid)
+
+
+def _cell_left_edges(path) -> list[float]:
+    # each cell's border is "<gray> RG\n.5 w\nn X Y W H re S" -- X is the
+    # cell's left edge in PDF points
+    return [float(m.group(1)) for m in re.finditer(r"n ([\d.]+) [\d.]+ [\d.]+ [\d.]+ re S", _page_content(path))]
+
+
+def test_render_pdf_larger_cell_gap_pushes_columns_further_apart(tmp_path):
+    narrow = MoleculeGrid.from_sdf(DATA_DIR / "sample_drugs.sdf", properties=["MW"], mols_per_row=2, cell_gap=8)
+    narrow.records = narrow.records[:2]
+    wide = MoleculeGrid.from_sdf(DATA_DIR / "sample_drugs.sdf", properties=["MW"], mols_per_row=2, cell_gap=60)
+    wide.records = wide.records[:2]
+
+    narrow_out, wide_out = tmp_path / "narrow_gap.pdf", tmp_path / "wide_gap.pdf"
+    narrow.to_pdf(narrow_out)
+    wide.to_pdf(wide_out)
+
+    narrow_x = _cell_left_edges(narrow_out)
+    wide_x = _cell_left_edges(wide_out)
+    assert len(narrow_x) == 2 and len(wide_x) == 2
+    # second column's left edge should sit further right with the bigger gap
+    assert wide_x[1] > narrow_x[1]

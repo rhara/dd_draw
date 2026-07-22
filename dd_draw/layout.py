@@ -22,6 +22,7 @@ class MoleculeGrid:
     atom_indices: bool = False
     bond_indices: bool = False
     font_size: int = 7
+    cell_gap: int = 8
     title: Optional[str] = None
 
     @classmethod
