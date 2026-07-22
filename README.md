@@ -123,6 +123,15 @@ generation behaves identically on all three platforms with nothing beyond
 directly from each molecule's SVG rather than reusing `render_html.py`'s
 CSS grid, since plain PDF has no CSS-grid equivalent to share.
 
+One gotcha worth knowing if you're reading `render_pdf.py`: `svglib`
+interprets an SVG's declared `width="250px"` using the standard 96dpi
+(CSS px) -> 72dpi (PDF pt) conversion, so a 250x200px structure parses to
+a 187.5x150pt `Drawing`, not 250x200pt. Scaling against the declared pixel
+size directly (instead of the parsed `Drawing`'s actual size) silently
+renders every structure at 75% of its intended size. `_svg_native_size`
+probes this with a throwaway molecule up front so the real scale factor
+is always used.
+
 ### Horizontal orientation
 
 RDKit's 2D coordinate generation picks *a* valid, non-overlapping layout,

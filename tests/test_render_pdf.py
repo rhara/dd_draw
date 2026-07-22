@@ -1,9 +1,12 @@
 import re
 from pathlib import Path
 
+import pytest
 from pypdf import PdfReader
+from reportlab.lib.pagesizes import A4
 
 from dd_draw.layout import MoleculeGrid
+from dd_draw.render_pdf import CELL_PADDING, MARGIN, _svg_native_size
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 
@@ -87,3 +90,42 @@ def test_render_pdf_larger_cell_gap_pushes_columns_further_apart(tmp_path):
     assert len(narrow_x) == 2 and len(wide_x) == 2
     # second column's left edge should sit further right with the bigger gap
     assert wide_x[1] > narrow_x[1]
+
+
+def test_svg_native_size_is_smaller_than_declared_pixels():
+    # svg2rlg converts a declared "Npx" using the standard 96dpi->72dpi
+    # ratio, so the parsed Drawing is 75% of the pixel value, not equal to
+    # it -- this is the exact discrepancy that caused molecules to render
+    # undersized and flush to a cell's bottom-left corner (see render_pdf).
+    native_w, native_h = _svg_native_size(250, 200)
+    assert native_w == pytest.approx(250 * 0.75, rel=0.02)
+    assert native_h == pytest.approx(200 * 0.75, rel=0.02)
+
+
+def test_render_pdf_structure_fills_its_depiction_box(tmp_path):
+    grid = MoleculeGrid.from_sdf(DATA_DIR / "sample_drugs.sdf", properties=["MW"])
+    grid.records = grid.records[:1]
+    grid.mols_per_row = 1
+    out = tmp_path / "one.pdf"
+    grid.to_pdf(out)
+
+    # our own applied `scale` is a "N 0 0 N 0 0 cm" matrix immediately
+    # followed by svg2rlg's own internal 0.75 px->pt matrix; skip the
+    # page's leading "1 0 0 1 0 0 cm" identity transform, which matches
+    # the same shape but isn't the one we're after
+    applied_scale = None
+    for match in re.finditer(r"([\d.]+) 0 0 \1 0 0 cm\s*q\s*\.75 0 0 -0\.75", _page_content(out)):
+        applied_scale = float(match.group(1))
+    assert applied_scale is not None
+
+    native_w, _ = _svg_native_size(grid.cell_width, grid.cell_height)
+    page_w, _ = A4
+    cell_w = page_w - 2 * MARGIN  # single column, no gap term
+    depiction_w = cell_w - 2 * CELL_PADDING
+    expected_scale = depiction_w / native_w
+    assert applied_scale == pytest.approx(expected_scale, rel=0.01)
+
+    # regression guard: the original bug scaled against the *declared*
+    # pixel size directly, which is ~33% smaller than the correct scale
+    naive_scale = depiction_w / grid.cell_width
+    assert applied_scale > naive_scale * 1.2

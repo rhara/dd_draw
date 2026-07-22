@@ -8,8 +8,9 @@ from __future__ import annotations
 
 import io
 from pathlib import Path
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Tuple, Union
 
+from rdkit import Chem
 from reportlab.graphics import renderPDF
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
@@ -27,6 +28,21 @@ CELL_PADDING = 6
 TITLE_HEIGHT = 18
 
 
+def _svg_native_size(width: int, height: int) -> Tuple[float, float]:
+    """svg2rlg interprets an SVG's declared `width="Npx"`/`height="Mpx"`
+    using the standard 96dpi (CSS px) -> 72dpi (PDF pt) conversion, so a
+    `mol_to_svg(..., width=250, height=200)` canvas parses to a Drawing
+    sized 187.5x150pt, not 250x200pt. Scaling against the *declared* pixel
+    size (as if it were already in points) silently renders everything at
+    75% of the intended size, flush to the depiction box's bottom-left
+    corner instead of filling it. Probing with a trivial molecule -- built
+    via the exact same `mol_to_svg` header -- gives the real native pt
+    size to scale against instead of assuming px == pt."""
+    probe_svg = mol_to_svg(Chem.MolFromSmiles("C"), width=width, height=height)
+    probe = svg2rlg(io.StringIO(probe_svg))
+    return probe.width, probe.height
+
+
 def render_pdf(grid: "MoleculeGrid", path: Union[str, Path], page_size=A4) -> None:
     properties = grid.display_properties()
     prop_font_size = grid.font_size
@@ -34,12 +50,14 @@ def render_pdf(grid: "MoleculeGrid", path: Union[str, Path], page_size=A4) -> No
     line_height = prop_font_size + 2
     gap = grid.cell_gap
 
+    native_w, native_h = _svg_native_size(grid.cell_width, grid.cell_height)
+
     page_w, page_h = page_size
     cols = max(1, grid.mols_per_row)
     cell_w = (page_w - 2 * MARGIN - (cols - 1) * gap) / cols
     depiction_w = cell_w - 2 * CELL_PADDING
-    scale = depiction_w / grid.cell_width
-    depiction_h = grid.cell_height * scale
+    scale = depiction_w / native_w
+    depiction_h = native_h * scale
     text_block_h = name_font_size + 4 + len(properties) * line_height
     cell_h = depiction_h + text_block_h + 2 * CELL_PADDING
 
