@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{ title or "dd_draw grid" }}</title>
+<style>
+  body { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; margin: 24px; color: #1a1a1a; }
+  h1 { font-size: 1.3em; margin-bottom: 4px; }
+  .meta { color: #666; font-size: 0.85em; margin-bottom: 16px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat({{ mols_per_row }}, 1fr);
+    gap: 12px;
+  }
+  .cell {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px;
+    background: #fff;
+  }
+  .cell .depiction { display: flex; justify-content: center; }
+  .cell .depiction svg { max-width: 100%; height: auto; }
+  .cell .name {
+    font-weight: 600;
+    font-size: 0.95em;
+    text-align: center;
+    margin-top: 4px;
+    word-break: break-word;
+  }
+  .cell table.props {
+    width: 100%;
+    margin-top: 6px;
+    border-collapse: collapse;
+    font-size: 0.82em;
+  }
+  .cell table.props td { padding: 1px 4px; }
+  .cell table.props td.key { color: #666; text-align: right; white-space: nowrap; }
+  .cell table.props td.value { text-align: left; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #1e1e1e; color: #eee; }
+    .cell { background: #2a2a2a; border-color: #444; }
+    .cell .depiction svg { filter: invert(0.92) hue-rotate(180deg); }
+    .cell table.props td.key { color: #aaa; }
+    .meta { color: #999; }
+  }
+</style>
+</head>
+<body>
+{% if title %}<h1>{{ title }}</h1>{% endif %}
+<div class="meta">{{ records|length }} compound{{ "" if records|length == 1 else "s" }}</div>
+<div class="grid">
+{% for rec in records %}
+  <div class="cell">
+    <div class="depiction">{{ rec.svg|safe }}</div>
+    <div class="name">{{ rec.name }}</div>
+    {% if properties %}
+    <table class="props">
+      {% for key in properties %}
+      <tr><td class="key">{{ key }}</td><td class="value">{{ rec.formatted[key] }}</td></tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+  </div>
+{% endfor %}
+</div>
+</body>
+</html>

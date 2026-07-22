@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dd_draw"
+version = "0.1.0"
+description = "Lay out a compound list (SMILES or SDF) as a sortable, property-annotated grid, rendered to self-contained HTML or paginated PDF"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = [
+    "rdkit>=2024.09.2",
+    "jinja2>=3.1",
+    "reportlab>=4.0",
+    "svglib>=1.5",
+]
+
+[project.scripts]
+dd_draw = "dd_draw.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["dd_draw*"]
+
+[tool.setuptools.package-data]
+dd_draw = ["templates/*.html"]

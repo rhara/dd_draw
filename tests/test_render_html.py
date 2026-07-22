@@ -1,0 +1,37 @@
+from pathlib import Path
+
+from dd_draw.layout import MoleculeGrid
+from dd_draw.render_html import format_value, render_html
+
+DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+
+
+def test_render_html_is_self_contained_and_has_all_cells():
+    grid = MoleculeGrid.from_sdf(DATA_DIR / "sample_drugs.sdf", properties=["MW", "LogP"])
+    html = render_html(grid)
+    assert html.count("<svg") == len(grid)
+    assert "cdn" not in html.lower() and "<script src" not in html and "<link " not in html
+    for rec in grid.records:
+        assert rec.name in html
+
+
+def test_render_html_missing_property_shows_em_dash(tmp_path):
+    smi = tmp_path / "mols.smi"
+    smi.write_text("CCO ethanol\n")
+    grid = MoleculeGrid.from_smiles(smi, properties=["NotPresent"])
+    html = render_html(grid)
+    assert "—" in html
+
+
+def test_render_html_escapes_special_characters(tmp_path):
+    smi = tmp_path / "mols.smi"
+    smi.write_text("CCO <script>alert(1)</script>\n")
+    grid = MoleculeGrid.from_smiles(smi)
+    html = render_html(grid)
+    assert "<script>alert(1)</script>" not in html
+
+
+def test_format_value_rounds_floats_and_marks_missing():
+    assert format_value(None) == "—"
+    assert format_value(1.23456) == "1.23"
+    assert format_value("text") == "text"

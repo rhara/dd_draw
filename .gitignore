@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.egg-info/
+/output/
+*.html
+*.pdf
+!dd_draw/templates/*.html
