@@ -14,6 +14,25 @@ def test_from_sdf_loads_records_and_default_properties():
     assert "MW" in props and "Score" in props
 
 
+def test_default_layout_flags():
+    grid = MoleculeGrid.from_sdf(DATA_DIR / "sample_drugs.sdf")
+    assert grid.orient_horizontal is True
+    assert grid.atom_indices is False
+    assert grid.bond_indices is False
+
+
+def test_layout_flags_are_settable_via_from_sdf():
+    grid = MoleculeGrid.from_sdf(
+        DATA_DIR / "sample_drugs.sdf",
+        orient_horizontal=False,
+        atom_indices=True,
+        bond_indices=True,
+    )
+    assert grid.orient_horizontal is False
+    assert grid.atom_indices is True
+    assert grid.bond_indices is True
+
+
 def test_from_smiles_compute_props_and_explicit_properties(tmp_path):
     smi = tmp_path / "mols.smi"
     smi.write_text("CCO ethanol\nCC methane\n")

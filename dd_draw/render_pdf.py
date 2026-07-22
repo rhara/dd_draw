@@ -63,7 +63,14 @@ def render_pdf(grid: "MoleculeGrid", path: Union[str, Path], page_size=A4) -> No
         x0 = MARGIN + col * cell_w
         y_top = top_y - row * cell_h
 
-        svg_text = mol_to_svg(rec.mol, width=grid.cell_width, height=grid.cell_height)
+        svg_text = mol_to_svg(
+            rec.mol,
+            width=grid.cell_width,
+            height=grid.cell_height,
+            orient_horizontal=grid.orient_horizontal,
+            atom_indices=grid.atom_indices,
+            bond_indices=grid.bond_indices,
+        )
         drawing = svg2rlg(io.StringIO(svg_text))
         drawing.width *= scale
         drawing.height *= scale

@@ -45,6 +45,14 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--cell-width", type=int, default=250, help="Structure depiction width in pixels (default: 250)")
     p.add_argument("--cell-height", type=int, default=200, help="Structure depiction height in pixels (default: 200)")
     p.add_argument("--title", default=None, help="Page/document title")
+    p.add_argument(
+        "--no-orient-horizontal",
+        dest="orient_horizontal",
+        action="store_false",
+        help="Keep each molecule's original 2D orientation instead of rotating it to be as wide as possible (default: rotate)",
+    )
+    p.add_argument("--atom-indices", action="store_true", help="Annotate each atom with its RDKit atom index")
+    p.add_argument("--bond-indices", action="store_true", help="Annotate each bond with its RDKit bond index")
     return p
 
 
@@ -65,6 +73,9 @@ def main(argv: list[str] | None = None) -> None:
         cell_width=args.cell_width,
         cell_height=args.cell_height,
         title=args.title,
+        orient_horizontal=args.orient_horizontal,
+        atom_indices=args.atom_indices,
+        bond_indices=args.bond_indices,
     )
 
     if args.sort_by:

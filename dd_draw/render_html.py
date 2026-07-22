@@ -35,7 +35,14 @@ def render_html(grid: "MoleculeGrid") -> str:
         rows.append(
             {
                 "name": rec.name,
-                "svg": mol_to_svg(rec.mol, width=grid.cell_width, height=grid.cell_height),
+                "svg": mol_to_svg(
+                    rec.mol,
+                    width=grid.cell_width,
+                    height=grid.cell_height,
+                    orient_horizontal=grid.orient_horizontal,
+                    atom_indices=grid.atom_indices,
+                    bond_indices=grid.bond_indices,
+                ),
                 "formatted": {key: format_value(rec.props.get(key)) for key in properties},
             }
         )

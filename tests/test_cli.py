@@ -37,3 +37,17 @@ def test_cli_sort_by_descending(tmp_path):
     out = tmp_path / "grid.html"
     main([str(DATA_DIR / "sample_drugs.sdf"), "-o", str(out), "--sort-by", "MW", "--descending"])
     assert out.exists()
+
+
+def test_cli_atom_and_bond_indices(tmp_path):
+    out = tmp_path / "grid.html"
+    main([str(DATA_DIR / "sample_drugs.sdf"), "-o", str(out), "--atom-indices", "--bond-indices"])
+    assert "class='note'" in out.read_text()
+
+
+def test_cli_no_orient_horizontal(tmp_path):
+    out_default = tmp_path / "default.html"
+    out_kept = tmp_path / "kept.html"
+    main([str(DATA_DIR / "sample_drugs.sdf"), "-o", str(out_default)])
+    main([str(DATA_DIR / "sample_drugs.sdf"), "-o", str(out_kept), "--no-orient-horizontal"])
+    assert out_default.read_text() != out_kept.read_text()

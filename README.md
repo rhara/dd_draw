@@ -28,6 +28,14 @@ last-mile "look at these compounds" step.
 - **Sorting**: `--sort-by NAME` reorders the whole grid by any one property,
   ascending or descending (`--descending`); compounds missing that property
   always sort last, regardless of direction
+- **Orientation**: every structure is rotated to be as wide as possible by
+  default (`--no-orient-horizontal` to keep each molecule's original 2D
+  orientation instead) -- 2D depiction (freshly computed *or* already
+  present in the input file) can come out taller than wide, which wastes
+  most of a landscape-ish grid cell
+- **Atom/bond indices**: `--atom-indices`/`--bond-indices` annotate every
+  atom/bond with its RDKit index, for referring to a specific atom or bond
+  (e.g. when reporting a docking/SAR finding, or picking a SMARTS anchor)
 - **Jupyter API**: `MoleculeGrid` is the one object the CLI, HTML renderer,
   and PDF renderer all share -- build it, `sort_by(...)` (chainable), and
   either let it auto-display inline (`_repr_html_`) or write it out
@@ -72,7 +80,7 @@ conda-forge-installed dependencies.
 **Linux / macOS / Windows (identical commands):**
 
 ```bash
-mamba create -n dd_draw -c conda-forge python=3.12 rdkit jinja2 reportlab svglib pytest
+mamba create -n dd_draw -c conda-forge python=3.12 rdkit numpy jinja2 reportlab svglib pytest
 mamba activate dd_draw
 cd dd_draw
 pip install --no-deps -e .   # editable install of dd_draw itself; drop -e for a fixed install
@@ -81,8 +89,9 @@ pip install --no-deps -e .   # editable install of dd_draw itself; drop -e for a
 (`conda` works identically in place of `mamba` if you don't have mamba
 installed.)
 
-**No mamba/conda available (any platform):** RDKit, jinja2, reportlab, and
-svglib all also ship as regular PyPI wheels, so a plain venv works too:
+**No mamba/conda available (any platform):** RDKit, numpy, jinja2,
+reportlab, and svglib all also ship as regular PyPI wheels, so a plain venv
+works too:
 
 ```bash
 python3.12 -m venv .venv
@@ -106,6 +115,19 @@ generation behaves identically on all three platforms with nothing beyond
 directly from each molecule's SVG rather than reusing `render_html.py`'s
 CSS grid, since plain PDF has no CSS-grid equivalent to share.
 
+### Horizontal orientation
+
+RDKit's 2D coordinate generation picks *a* valid, non-overlapping layout,
+not necessarily a wide one -- and a molecule loaded from someone else's SDF
+already carries whatever orientation that file's own coordinates happen to
+be in, which is just as arbitrary. By default, `depict.py` runs a PCA over
+each molecule's atom positions and rotates it so its longest extent is
+horizontal (falling back to the perpendicular axis if that still comes out
+taller than wide, e.g. cross-shaped layouts). Pass `--no-orient-horizontal`
+(`orient_horizontal=False` in the API) to keep a molecule's original
+orientation as-is -- useful if the input coordinates are meaningful on
+their own, e.g. matching a docked pose's orientation in a pocket.
+
 ## Usage
 
 ```bash
@@ -120,6 +142,9 @@ dd_draw data/sample_drugs.smi -o grid.html --compute-props MW,LogP,TPSA --sort-b
 
 # merge in your own property table (CSV keyed by compound name, first column by default)
 dd_draw hits.smi -o hits.html --props-csv docking_scores.csv --sort-by docking_score
+
+# annotate atom/bond indices, and keep each molecule's original orientation instead of auto-rotating
+dd_draw hits.sdf -o hits.html --atom-indices --bond-indices --no-orient-horizontal
 ```
 
 Full option list: `dd_draw --help`.
@@ -136,6 +161,9 @@ Full option list: `dd_draw --help`.
 | `--cols` | molecules per row | 4 |
 | `--cell-width` / `--cell-height` | structure depiction size in pixels | 250 / 200 |
 | `--title` | page/document title | none |
+| `--no-orient-horizontal` | keep each molecule's original 2D orientation instead of rotating it to be as wide as possible | rotate |
+| `--atom-indices` | annotate each atom with its RDKit atom index | off |
+| `--bond-indices` | annotate each bond with its RDKit bond index | off |
 
 Available `--compute-props` descriptors: `MW`, `LogP`, `TPSA`, `HBD`, `HBA`,
 `RotB`, `NumRings`, `HeavyAtoms`, `FractionCSP3`, `QED`.
@@ -160,6 +188,14 @@ grid2 = MoleculeGrid.from_smiles(
     mols_per_row=5,
     title="My library",
 ).sort_by("MW")
+
+# atom/bond indices, original (non-rotated) orientation
+grid3 = MoleculeGrid.from_sdf(
+    "hits.sdf",
+    atom_indices=True,
+    bond_indices=True,
+    orient_horizontal=False,
+)
 ```
 
 `MoleculeGrid.from_file(path, ...)` dispatches to `from_smiles`/`from_sdf`
@@ -179,9 +215,9 @@ demo by) as SD tags. Regenerate with `python data/build_sample_drugs.py`
 
 ## Dependencies
 
-RDKit >= 2024.09.2 (2D depiction), Jinja2 >= 3.1 (HTML templating),
-reportlab >= 4.0 + svglib >= 1.5 (PDF rendering). No JavaScript, no CDN, no
-system Cairo/Pango/GTK.
+RDKit >= 2024.09.2 (2D depiction), numpy (horizontal-orientation PCA),
+Jinja2 >= 3.1 (HTML templating), reportlab >= 4.0 + svglib >= 1.5 (PDF
+rendering). No JavaScript, no CDN, no system Cairo/Pango/GTK.
 
 ## License
 

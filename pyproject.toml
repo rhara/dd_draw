@@ -11,6 +11,7 @@ license = "MIT"
 requires-python = ">=3.10"
 dependencies = [
     "rdkit>=2024.09.2",
+    "numpy",
     "jinja2>=3.1",
     "reportlab>=4.0",
     "svglib>=1.5",

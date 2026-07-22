@@ -18,6 +18,9 @@ class MoleculeGrid:
     mols_per_row: int = 4
     cell_width: int = 250
     cell_height: int = 200
+    orient_horizontal: bool = True
+    atom_indices: bool = False
+    bond_indices: bool = False
     title: Optional[str] = None
 
     @classmethod
